@@ -40,6 +40,14 @@ header span { font-size: 12px; color: #666; }
 .filter-bar::-webkit-scrollbar { display: none; }
 .filter-btn { flex-shrink: 0; font-size: 12px; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; background: transparent; color: #888; cursor: pointer; transition: all 0.15s; }
 .filter-btn:hover, .filter-btn.active { background: #e8e8e8; color: #0f0f0f; border-color: #e8e8e8; }
+.block-heading { font-size: 15px; font-weight: 700; color: #e8e8e8; margin: 20px 0 8px; }
+.block-bullet { font-size: 14px; line-height: 1.8; color: #ccc; padding-left: 4px; margin-bottom: 4px; }
+.block-numbered { font-size: 14px; line-height: 1.8; color: #ccc; padding-left: 4px; margin-bottom: 4px; }
+.block-para { font-size: 14px; line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+.block-gap { height: 8px; }
+.block-quote { font-size: 14px; line-height: 1.8; color: #aaa; border-left: 3px solid #444; padding-left: 12px; margin: 8px 0; }
+.modal-body a { color: #5b9bd5; text-decoration: none; }
+.modal-body code { background: #2a2a2a; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -188,25 +196,38 @@ function filterByTag(tag) {
 
 document.getElementById('btn-전체').addEventListener('click', function() { filterByTag('전체'); });
 
-function blocksToText(blocks) {
-  var text = '';
+function blocksToHTML(blocks) {
+  var html = '';
   blocks.forEach(function(block) {
     var type = block.type;
     var content = block[type];
     if (!content) return;
     var richText = content.rich_text || [];
-    var plain = richText.map(function(t) { return t.plain_text; }).join('');
+    var inner = richText.map(function(t) {
+      var text = t.plain_text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      if (t.annotations) {
+        if (t.annotations.bold) text = '<b>' + text + '</b>';
+        if (t.annotations.italic) text = '<i>' + text + '</i>';
+        if (t.annotations.strikethrough) text = '<s>' + text + '</s>';
+        if (t.annotations.code) text = '<code>' + text + '</code>';
+      }
+      if (t.href) text = '<a href="' + t.href + '" target="_blank">' + text + '</a>';
+      return text;
+    }).join('');
+
     if (type === 'heading_1' || type === 'heading_2' || type === 'heading_3') {
-      text += '\n▌ ' + plain + '\n\n';
+      html += '<div class="block-heading">' + inner + '</div>';
     } else if (type === 'bulleted_list_item') {
-      text += '• ' + plain + '\n';
+      html += '<div class="block-bullet">• ' + inner + '</div>';
     } else if (type === 'numbered_list_item') {
-      text += plain + '\n';
+      html += '<div class="block-numbered">' + inner + '</div>';
     } else if (type === 'paragraph') {
-      text += plain ? plain + '\n\n' : '\n';
+      html += inner ? '<div class="block-para">' + inner + '</div>' : '<div class="block-gap"></div>';
+    } else if (type === 'quote') {
+      html += '<div class="block-quote">' + inner + '</div>';
     }
   });
-  return text.trim();
+  return html;
 }
 
 function openModal(pageId, item) {
@@ -223,8 +244,8 @@ function openModal(pageId, item) {
 
   fetchPage(pageId).then(function(data) {
     var blocks = data.results || [];
-    var bodyText = blocksToText(blocks);
-    document.getElementById('modalBody').textContent = bodyText || '본문이 없습니다.';
+    var bodyText = blocksToHTML(blocks);
+document.getElementById('modalBody').innerHTML = bodyText || '본문이 없습니다.';
   });
 }
 
