@@ -6,304 +6,248 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>경제뉴스 피드</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #0f0f0f; color: #e8e8e8; font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
-  
-  header { position: sticky; top: 0; z-index: 100; background: #0f0f0f; border-bottom: 1px solid #222; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
-  header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
-  header span { font-size: 12px; color: #666; }
-
-  .feed { max-width: 680px; margin: 0 auto; padding: 16px; }
-
-  .date-group { margin-bottom: 32px; }
-  .date-label { font-size: 12px; color: #555; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 12px; padding-left: 4px; }
-
-  .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px; margin-bottom: 12px; cursor: pointer; transition: border-color 0.15s; }
-  .card:hover { border-color: #444; }
-
-  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-  .card-title { font-size: 15px; font-weight: 600; line-height: 1.4; letter-spacing: -0.3px; flex: 1; }
-  .stars { display: flex; gap: 2px; flex-shrink: 0; margin-top: 2px; }
-  .star { font-size: 12px; }
-
-  .card-summary { font-size: 13px; color: #999; line-height: 1.6; letter-spacing: -0.2px; margin-bottom: 12px; }
-
-  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-  .tag { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500; }
-  .tag-거시경제 { background: #1e2d3d; color: #5b9bd5; }
-  .tag-주식시장 { background: #1e3d2d; color: #5bd58a; }
-  .tag-부동산 { background: #3d2d1e; color: #d5955b; }
-  .tag-국제정세 { background: #2d1e3d; color: #955bd5; }
-  .tag-금융정책 { background: #3d1e2d; color: #d55b95; }
-  .tag-기업실적 { background: #1e3d3d; color: #5bd5d5; }
-  .tag-산업동향 { background: #2d3d1e; color: #95d55b; }
-  .tag-AI { background: #3d3d1e; color: #d5d55b; }
-  .tag-IT플랫폼 { background: #1e1e3d; color: #5b5bd5; }
-  .tag-자본시장 { background: #3d1e1e; color: #d55b5b; }
-  .tag-환율 { background: #2d2d1e; color: #d5c55b; }
-  .tag-default { background: #222; color: #888; }
-
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; overflow-y: auto; padding: 20px; }
-  .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
-  .modal { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; max-width: 680px; width: 100%; padding: 28px; margin: auto; position: relative; }
-  .modal-close { position: absolute; top: 20px; right: 20px; background: #2a2a2a; border: none; color: #888; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
-  .modal-close:hover { color: #fff; }
-  .modal-date { font-size: 12px; color: #555; margin-bottom: 8px; }
-  .modal-title { font-size: 20px; font-weight: 700; line-height: 1.4; letter-spacing: -0.5px; margin-bottom: 16px; }
-  .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
-  .modal-summary { font-size: 14px; color: #aaa; line-height: 1.7; padding: 16px; background: #111; border-radius: 8px; margin-bottom: 24px; letter-spacing: -0.2px; }
-  .modal-body { font-size: 14px; line-height: 1.8; color: #ccc; letter-spacing: -0.2px; white-space: pre-wrap; }
-  .modal-body h2 { font-size: 15px; font-weight: 700; color: #e8e8e8; margin: 24px 0 12px; }
-  .modal-source { margin-top: 24px; padding-top: 16px; border-top: 1px solid #2a2a2a; font-size: 12px; color: #555; }
-  .modal-source a { color: #5b9bd5; text-decoration: none; }
-
-  .loading { text-align: center; padding: 60px 20px; color: #444; font-size: 14px; }
-  .error { text-align: center; padding: 60px 20px; color: #d55b5b; font-size: 14px; }
-
-  .filter-bar { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px; scrollbar-width: none; }
-  .filter-bar::-webkit-scrollbar { display: none; }
-  .filter-btn { flex-shrink: 0; font-size: 12px; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; background: transparent; color: #888; cursor: pointer; transition: all 0.15s; }
-  .filter-btn:hover, .filter-btn.active { background: #e8e8e8; color: #0f0f0f; border-color: #e8e8e8; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0f0f0f; color: #e8e8e8; font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+header { position: sticky; top: 0; z-index: 100; background: #0f0f0f; border-bottom: 1px solid #222; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+header span { font-size: 12px; color: #666; }
+.feed { max-width: 680px; margin: 0 auto; padding: 16px; }
+.date-group { margin-bottom: 32px; }
+.date-label { font-size: 12px; color: #555; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 12px; padding-left: 4px; }
+.card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px; margin-bottom: 12px; cursor: pointer; transition: border-color 0.15s; }
+.card:hover { border-color: #444; }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.card-title { font-size: 15px; font-weight: 600; line-height: 1.4; letter-spacing: -0.3px; flex: 1; }
+.stars { display: flex; gap: 2px; flex-shrink: 0; margin-top: 2px; font-size: 12px; }
+.card-summary { font-size: 13px; color: #999; line-height: 1.6; letter-spacing: -0.2px; margin-bottom: 12px; }
+.card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500; background: #222; color: #888; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; overflow-y: auto; padding: 20px; }
+.modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+.modal { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; max-width: 680px; width: 100%; padding: 28px; margin: auto; position: relative; }
+.modal-close { position: absolute; top: 20px; right: 20px; background: #2a2a2a; border: none; color: #888; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { color: #fff; }
+.modal-date { font-size: 12px; color: #555; margin-bottom: 8px; }
+.modal-title { font-size: 20px; font-weight: 700; line-height: 1.4; letter-spacing: -0.5px; margin-bottom: 16px; }
+.modal-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.modal-summary { font-size: 14px; color: #aaa; line-height: 1.7; padding: 16px; background: #111; border-radius: 8px; margin-bottom: 24px; }
+.modal-body { font-size: 14px; line-height: 1.8; color: #ccc; letter-spacing: -0.2px; white-space: pre-wrap; }
+.modal-source { margin-top: 24px; padding-top: 16px; border-top: 1px solid #2a2a2a; font-size: 12px; color: #555; }
+.modal-source a { color: #5b9bd5; text-decoration: none; }
+.loading { text-align: center; padding: 60px 20px; color: #444; font-size: 14px; }
+.error { text-align: center; padding: 60px 20px; color: #d55b5b; font-size: 14px; }
+.filter-bar { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px; scrollbar-width: none; }
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-btn { flex-shrink: 0; font-size: 12px; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; background: transparent; color: #888; cursor: pointer; transition: all 0.15s; }
+.filter-btn:hover, .filter-btn.active { background: #e8e8e8; color: #0f0f0f; border-color: #e8e8e8; }
 </style>
 </head>
 <body>
-
 <header>
   <h1>📈 경제뉴스</h1>
   <span id="count"></span>
 </header>
-
 <div class="filter-bar" id="filterBar">
-  <button class="filter-btn active" onclick="filterByTag('전체')">전체</button>
+  <button class="filter-btn active" id="btn-전체">전체</button>
 </div>
-
 <div class="feed" id="feed">
   <div class="loading">뉴스를 불러오는 중...</div>
 </div>
-
-<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+<div class="modal-overlay" id="modalOverlay">
   <div class="modal" id="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" id="modalClose">✕</button>
     <div class="modal-date" id="modalDate"></div>
     <div class="modal-title" id="modalTitle"></div>
     <div class="modal-tags" id="modalTags"></div>
     <div class="modal-summary" id="modalSummary"></div>
-    <div class="modal-body" id="modalBody">
-      <div class="loading">본문을 불러오는 중...</div>
-    </div>
+    <div class="modal-body" id="modalBody"><div class="loading">본문을 불러오는 중...</div></div>
     <div class="modal-source" id="modalSource"></div>
   </div>
 </div>
-
 <script>
-const NOTION_TOKEN = 'NOTION_TOKEN_PLACEHOLDER';
-const DB_ID = '2fa5d658-fe4a-8040-87ae-c4cb9106eca3';
-const PROXY = '/api/notion';
+var DB_ID = '2fa5d658-fe4a-8040-87ae-c4cb9106eca3';
+var PROXY = '/api/notion';
+var allItems = [];
+var newsMap = {};
 
-let allItems = [];
-let currentTag = '전체';
-
-async function fetchDB() {
-  try {
-    const res = await fetch(`${PROXY}/databases/${DB_ID}/query`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sorts: [{ property: '날짜', direction: 'descending' }], page_size: 100 })
-    });
-    const data = await res.json();
-    return data.results || [];
-  } catch(e) {
-    return null;
-  }
+function fetchDB() {
+  return fetch(PROXY + '/databases/' + DB_ID + '/query', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sorts: [{ property: '날짜', direction: 'descending' }], page_size: 100 })
+  }).then(function(r) { return r.json(); }).catch(function() { return null; });
 }
 
-async function fetchPage(pageId) {
-  try {
-    const res = await fetch(`${PROXY}/blocks/${pageId}/children`, {
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const data = await res.json();
-    return data.results || [];
-  } catch(e) {
-    return [];
-  }
+function fetchPage(pageId) {
+  return fetch(PROXY + '/blocks/' + pageId + '/children', {
+    headers: { 'Content-Type': 'application/json' }
+  }).then(function(r) { return r.json(); }).catch(function() { return { results: [] }; });
 }
 
 function parseItem(page) {
-  const props = page.properties;
+  var props = page.properties;
   return {
     id: page.id,
-    title: props['이슈']?.title?.[0]?.plain_text || '제목 없음',
-    date: props['날짜']?.date?.start || '',
-    summary: props['한줄요약']?.rich_text?.[0]?.plain_text || '',
-    stars: props['중요도']?.select?.name || '',
-    tags: props['주제']?.multi_select?.map(t => t.name) || [],
-    source: props['출처']?.select?.name || '',
-    url: props['URL']?.url || ''
+    title: props['이슈'] && props['이슈'].title && props['이슈'].title[0] ? props['이슈'].title[0].plain_text : '제목 없음',
+    date: props['날짜'] && props['날짜'].date ? props['날짜'].date.start : '',
+    summary: props['한줄요약'] && props['한줄요약'].rich_text && props['한줄요약'].rich_text[0] ? props['한줄요약'].rich_text[0].plain_text : '',
+    stars: props['중요도'] && props['중요도'].select ? props['중요도'].select.name : '',
+    tags: props['주제'] && props['주제'].multi_select ? props['주제'].multi_select.map(function(t) { return t.name; }) : [],
+    source: props['출처'] && props['출처'].select ? props['출처'].select.name : '',
+    url: props['URL'] && props['URL'].url ? props['URL'].url : ''
   };
 }
 
 function starsHTML(stars) {
-  const count = (stars.match(/★/g) || []).length || stars.length;
-  return Array(Math.min(count, 3)).fill('<span class="star">★</span>').join('');
+  if (!stars) return '';
+  var count = (stars.match(/★/g) || []).length;
+  var result = '';
+  for (var i = 0; i < Math.min(count, 3); i++) { result += '★'; }
+  return result;
 }
 
-function tagHTML(tag) {
-  const cls = `tag-${tag}`;
-  return `<span class="tag tag-${tag}" style="">${tag}</span>`;
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr);
+  var days = ['일','월','화','수','목','금','토'];
+  return d.getFullYear() + '년 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일 (' + days[d.getDay()] + ')';
 }
 
 function groupByDate(items) {
-  const groups = {};
-  items.forEach(item => {
-    const d = item.date || '날짜 없음';
+  var groups = {};
+  items.forEach(function(item) {
+    var d = item.date || '날짜 없음';
     if (!groups[d]) groups[d] = [];
     groups[d].push(item);
   });
   return groups;
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  const days = ['일','월','화','수','목','금','토'];
-  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
-}
-
 function renderFeed(items) {
-  const feed = document.getElementById('feed');
+  var feed = document.getElementById('feed');
   if (!items || items.length === 0) {
     feed.innerHTML = '<div class="error">뉴스가 없습니다.</div>';
     return;
   }
+  newsMap = {};
+  items.forEach(function(item) { newsMap[item.id] = item; });
 
-  window._newsItems = {};
-  items.forEach(item => { window._newsItems[item.id] = item; });
-
-  const groups = groupByDate(items);
-  let html = '';
-  Object.keys(groups).sort((a,b) => b.localeCompare(a)).forEach(date => {
-    html += `<div class="date-group">`;
-    html += `<div class="date-label">${formatDate(date)}</div>`;
-    groups[date].forEach(item => {
-      html += `<div class="card" data-id="${item.id}">`;
-      html += `<div class="card-top"><div class="card-title">${item.title}</div><div class="stars">${starsHTML(item.stars)}</div></div>`;
-      if (item.summary) html += `<div class="card-summary">${item.summary}</div>`;
-      if (item.tags.length) html += `<div class="card-tags">${item.tags.map(t => `<span class="tag tag-${t} tag-default">${t}</span>`).join('')}</div>`;
-      html += `</div>`;
+  var groups = groupByDate(items);
+  var dates = Object.keys(groups).sort(function(a,b) { return b < a ? -1 : 1; });
+  var html = '';
+  dates.forEach(function(date) {
+    html += '<div class="date-group">';
+    html += '<div class="date-label">' + formatDate(date) + '</div>';
+    groups[date].forEach(function(item) {
+      html += '<div class="card" data-id="' + item.id + '">';
+      html += '<div class="card-top"><div class="card-title">' + item.title + '</div><div class="stars">' + starsHTML(item.stars) + '</div></div>';
+      if (item.summary) html += '<div class="card-summary">' + item.summary + '</div>';
+      if (item.tags.length) {
+        html += '<div class="card-tags">';
+        item.tags.forEach(function(t) { html += '<span class="tag">' + t + '</span>'; });
+        html += '</div>';
+      }
+      html += '</div>';
     });
-    html += `</div>`;
+    html += '</div>';
   });
   feed.innerHTML = html;
 
-  document.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('click', () => {
-      const id = card.dataset.id;
-      const item = window._newsItems[id];
-      openModal(id, item);
+  document.querySelectorAll('.card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var id = card.getAttribute('data-id');
+      openModal(id, newsMap[id]);
     });
   });
-}
-
-  const groups = groupByDate(items);
-  let html = '';
-  Object.keys(groups).sort((a,b) => b.localeCompare(a)).forEach(date => {
-    html += `<div class="date-group">`;
-    html += `<div class="date-label">${formatDate(date)}</div>`;
-    groups[date].forEach(item => {
-      html += `<div class="card" data-id="${item.id}" data-item='${JSON.stringify(item).replace(/'/g, "&apos;")}'>`;
-      html += `<div class="card-top"><div class="card-title">${item.title}</div><div class="stars">${starsHTML(item.stars)}</div></div>`;
-      if (item.summary) html += `<div class="card-summary">${item.summary}</div>`;
-      if (item.tags.length) html += `<div class="card-tags">${item.tags.map(t => `<span class="tag tag-${t} tag-default">${t}</span>`).join('')}</div>`;
-      html += `</div>`;
-    });
-    html += `</div>`;
-  });
-  feed.innerHTML = html;
 }
 
 function renderFilters(items) {
-  const tags = [...new Set(items.flatMap(i => i.tags))].sort();
-  const bar = document.getElementById('filterBar');
-  tags.forEach(tag => {
-    const btn = document.createElement('button');
+  var tags = [];
+  items.forEach(function(item) {
+    item.tags.forEach(function(t) { if (tags.indexOf(t) === -1) tags.push(t); });
+  });
+  tags.sort();
+  var bar = document.getElementById('filterBar');
+  tags.forEach(function(tag) {
+    var btn = document.createElement('button');
     btn.className = 'filter-btn';
+    btn.id = 'btn-' + tag;
     btn.textContent = tag;
-    btn.onclick = () => filterByTag(tag);
+    btn.addEventListener('click', function() { filterByTag(tag); });
     bar.appendChild(btn);
   });
 }
 
 function filterByTag(tag) {
-  currentTag = tag;
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent === tag);
-  });
-  const filtered = tag === '전체' ? allItems : allItems.filter(i => i.tags.includes(tag));
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  var activeBtn = document.getElementById('btn-' + tag);
+  if (activeBtn) activeBtn.classList.add('active');
+  var filtered = tag === '전체' ? allItems : allItems.filter(function(i) { return i.tags.indexOf(tag) !== -1; });
   renderFeed(filtered);
 }
 
+document.getElementById('btn-전체').addEventListener('click', function() { filterByTag('전체'); });
+
 function blocksToText(blocks) {
-  let text = '';
-  blocks.forEach(block => {
-    const type = block.type;
-    const content = block[type];
+  var text = '';
+  blocks.forEach(function(block) {
+    var type = block.type;
+    var content = block[type];
     if (!content) return;
-    const richText = content.rich_text || [];
-    const plain = richText.map(t => t.plain_text).join('');
+    var richText = content.rich_text || [];
+    var plain = richText.map(function(t) { return t.plain_text; }).join('');
     if (type === 'heading_1' || type === 'heading_2' || type === 'heading_3') {
-      text += `\n## ${plain}\n\n`;
+      text += '\n▌ ' + plain + '\n\n';
     } else if (type === 'bulleted_list_item') {
-      text += `• ${plain}\n`;
+      text += '• ' + plain + '\n';
     } else if (type === 'numbered_list_item') {
-      text += `${plain}\n`;
+      text += plain + '\n';
     } else if (type === 'paragraph') {
-      text += plain ? `${plain}\n\n` : '\n';
-    } else if (type === 'quote') {
-      text += `> ${plain}\n\n`;
+      text += plain ? plain + '\n\n' : '\n';
     }
   });
   return text.trim();
 }
 
-async function openModal(pageId, item) {
-  const overlay = document.getElementById('modalOverlay');
-  overlay.classList.add('open');
+function openModal(pageId, item) {
+  var overlay = document.getElementById('modalOverlay');
+  overlay.style.display = 'flex';
   document.getElementById('modalDate').textContent = formatDate(item.date);
   document.getElementById('modalTitle').textContent = item.title;
-  document.getElementById('modalTags').innerHTML = item.tags.map(t => `<span class="tag tag-default">${t}</span>`).join('');
+  var tagsHtml = '';
+  item.tags.forEach(function(t) { tagsHtml += '<span class="tag">' + t + '</span>'; });
+  document.getElementById('modalTags').innerHTML = tagsHtml;
   document.getElementById('modalSummary').textContent = item.summary;
   document.getElementById('modalBody').innerHTML = '<div class="loading">본문을 불러오는 중...</div>';
-  document.getElementById('modalSource').innerHTML = item.url ? `출처: <a href="${item.url}" target="_blank">${item.source || item.url}</a>` : '';
+  document.getElementById('modalSource').innerHTML = item.url ? '출처: <a href="' + item.url + '" target="_blank">' + (item.source || item.url) + '</a>' : '';
 
-  const blocks = await fetchPage(pageId);
-  const bodyText = blocksToText(blocks);
-  document.getElementById('modalBody').textContent = bodyText || '본문이 없습니다.';
+  fetchPage(pageId).then(function(data) {
+    var blocks = data.results || [];
+    var bodyText = blocksToText(blocks);
+    document.getElementById('modalBody').textContent = bodyText || '본문이 없습니다.';
+  });
 }
 
 function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('modalOverlay').style.display = 'none';
 }
 
-function closeModalOnBg(e) {
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
-}
+});
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-async function init() {
-  const pages = await fetchDB();
-  if (!pages) {
+fetchDB().then(function(data) {
+  if (!data || !data.results) {
     document.getElementById('feed').innerHTML = '<div class="error">데이터를 불러오지 못했습니다.</div>';
     return;
   }
-  allItems = pages.map(parseItem);
-  document.getElementById('count').textContent = `${allItems.length}개`;
+  allItems = data.results.map(parseItem);
+  document.getElementById('count').textContent = allItems.length + '개';
   renderFilters(allItems);
   renderFeed(allItems);
-}
-
-init();
+});
 </script>
 </body>
 </html>
