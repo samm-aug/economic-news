@@ -183,7 +183,32 @@ function renderFeed(items) {
     html += `<div class="date-group">`;
     html += `<div class="date-label">${formatDate(date)}</div>`;
     groups[date].forEach(item => {
-      html += `<div class="card" onclick="openModal('${item.id}', ${JSON.stringify(item).replace(/'/g, "\\'")})" >`;
+      html += `<div class="card" data-id="${item.id}" data-item='${JSON.stringify(item).replace(/'/g, "&apos;")}'>`;
+      html += `<div class="card-top"><div class="card-title">${item.title}</div><div class="stars">${starsHTML(item.stars)}</div></div>`;
+      if (item.summary) html += `<div class="card-summary">${item.summary}</div>`;
+      if (item.tags.length) html += `<div class="card-tags">${item.tags.map(t => `<span class="tag tag-${t} tag-default">${t}</span>`).join('')}</div>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  feed.innerHTML = html;
+
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = card.dataset.id;
+      const item = JSON.parse(card.dataset.item.replace(/&apos;/g, "'"));
+      openModal(id, item);
+    });
+  });
+}
+
+  const groups = groupByDate(items);
+  let html = '';
+  Object.keys(groups).sort((a,b) => b.localeCompare(a)).forEach(date => {
+    html += `<div class="date-group">`;
+    html += `<div class="date-label">${formatDate(date)}</div>`;
+    groups[date].forEach(item => {
+      html += `<div class="card" data-id="${item.id}" data-item='${JSON.stringify(item).replace(/'/g, "&apos;")}'>`;
       html += `<div class="card-top"><div class="card-title">${item.title}</div><div class="stars">${starsHTML(item.stars)}</div></div>`;
       if (item.summary) html += `<div class="card-summary">${item.summary}</div>`;
       if (item.tags.length) html += `<div class="card-tags">${item.tags.map(t => `<span class="tag tag-${t} tag-default">${t}</span>`).join('')}</div>`;
