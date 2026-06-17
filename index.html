@@ -218,16 +218,16 @@ function blocksToHTML(blocks) {
     }).join('');
 
     if (type === 'numbered_list_item') {
-      var prevType = i > 0 ? blocks[i-1].type : '';
-      if (prevType !== 'numbered_list_item' && prevType !== 'bulleted_list_item' && prevType !== 'paragraph') {
-        numCount = 0;
-      }
-      numCount++;
-      html += '<div class="block-numbered">' + numCount + '. ' + inner + '</div>';
-    } else if (type === 'heading_1' || type === 'heading_2' || type === 'heading_3') {
-      numCount = 0;
-      html += '<div class="block-heading">' + inner + '</div>';
-    } else if (type === 'bulleted_list_item') {
+  var prevType = i > 0 ? blocks[i-1].type : '';
+  if (prevType !== 'numbered_list_item' && prevType !== 'bulleted_list_item' && prevType !== 'paragraph') {
+    numCount = 0;
+  }
+  numCount++;
+  html += '<div class="block-numbered">' + numCount + '. ' + inner + '</div>';
+} else if (type === 'heading_1' || type === 'heading_2' || type === 'heading_3') {
+  numCount = 0;
+  html += '<div class="block-heading">' + inner + '</div>';
+} else if (type === 'bulleted_list_item') {
       html += '<div class="block-bullet">• ' + inner + '</div>';
     } else if (type === 'paragraph') {
       html += inner ? '<div class="block-para">' + inner + '</div>' : '<div class="block-gap"></div>';
