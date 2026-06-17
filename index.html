@@ -11,19 +11,23 @@ body { background: #0f0f0f; color: #e8e8e8; font-family: 'Apple SD Gothic Neo', 
 header { position: sticky; top: 0; z-index: 100; background: #0f0f0f; border-bottom: 1px solid #222; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
 header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
 header span { font-size: 13px; color: #666; }
-.week-bar { display: flex; justify-content: center; gap: 4px; padding: 12px 16px; background: #0f0f0f; border-bottom: 1px solid #1a1a1a; }
+.week-bar { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 12px 16px; background: #0f0f0f; border-bottom: 1px solid #1a1a1a; }
+.week-arrow { background: transparent; border: 1px solid #2a2a2a; color: #555; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.week-arrow:hover { border-color: #555; color: #e8e8e8; }
+.week-days { display: flex; gap: 4px; }
 .week-day { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 10px; cursor: pointer; transition: background 0.15s; min-width: 48px; }
 .week-day:hover { background: #1a1a1a; }
 .week-day.today { background: #1e2d1e; }
-.week-day.has-news .week-dot { opacity: 1; }
 .week-day-label { font-size: 11px; color: #555; font-weight: 500; }
 .week-day.today .week-day-label { color: #5bd58a; }
-.week-date { font-size: 16px; font-weight: 600; color: #888; }
+.week-date { font-size: 16px; font-weight: 600; color: #555; }
 .week-day.today .week-date { color: #5bd58a; }
 .week-day.has-news .week-date { color: #e8e8e8; }
-.week-dot { width: 4px; height: 4px; border-radius: 50%; background: #5bd58a; opacity: 0; }
+.week-dot { width: 5px; height: 5px; border-radius: 50%; background: #5bd58a; visibility: hidden; }
+.week-day.has-news .week-dot { visibility: visible; }
 .week-day.no-news { cursor: default; }
 .week-day.no-news:hover { background: transparent; }
+.week-label { font-size: 11px; color: #444; text-align: center; margin-top: 2px; }
 .filter-bar { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px; scrollbar-width: none; border-bottom: 1px solid #1a1a1a; }
 .filter-bar::-webkit-scrollbar { display: none; }
 .filter-btn { flex-shrink: 0; font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; background: transparent; color: #888; cursor: pointer; transition: all 0.15s; }
@@ -76,7 +80,12 @@ header span { font-size: 13px; color: #666; }
   <h1>📈 경제뉴스</h1>
   <span id="count"></span>
 </header>
-<div class="week-bar" id="weekBar"></div>
+<div class="week-bar">
+  <button class="week-arrow" id="weekPrev">‹</button>
+  <div class="week-days" id="weekBar"></div>
+  <button class="week-arrow" id="weekNext">›</button>
+</div>
+<div class="week-label" id="weekLabel"></div>
 <div class="filter-bar" id="filterBar">
   <button class="filter-btn active" id="btn-전체">전체</button>
 </div>
@@ -156,6 +165,8 @@ function formatDate(dateStr) {
   return d.getFullYear() + '년 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일 (' + days[d.getDay()] + ')';
 }
 
+var weekOffset = 0;
+
 function renderWeekBar(items) {
   var newsDates = {};
   items.forEach(function(item) { if (item.date) newsDates[item.date] = true; });
@@ -163,11 +174,18 @@ function renderWeekBar(items) {
   var today = new Date();
   var dayOfWeek = today.getDay();
   var monday = new Date(today);
-  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) + weekOffset * 7);
 
-  var dayNames = ['월','화','수','목','금'];
-  var bar = document.getElementById('weekBar');
-  bar.innerHTML = '';
+  var friday = new Date(monday);
+  friday.setDate(monday.getDate() + 4);
+  var labelEl = document.getElementById("weekLabel");
+  if (labelEl) {
+    labelEl.textContent = (monday.getMonth()+1) + "월 " + monday.getDate() + "일 - " + (friday.getMonth()+1) + "월 " + friday.getDate() + "일";
+  }
+
+  var dayNames = ["월","화","수","목","금"];
+  var bar = document.getElementById("weekBar");
+  bar.innerHTML = "";
 
   for (var i = 0; i < 5; i++) {
     var d = new Date(monday);
@@ -176,19 +194,19 @@ function renderWeekBar(items) {
     var isToday = toDateStr(today) === dateStr;
     var hasNews = !!newsDates[dateStr];
 
-    var div = document.createElement('div');
-    div.className = 'week-day' + (isToday ? ' today' : '') + (hasNews ? ' has-news' : ' no-news');
+    var div = document.createElement("div");
+    div.className = "week-day" + (isToday ? " today" : "") + (hasNews ? " has-news" : " no-news");
 
-    var label = document.createElement('div');
-    label.className = 'week-day-label';
+    var label = document.createElement("div");
+    label.className = "week-day-label";
     label.textContent = dayNames[i];
 
-    var date = document.createElement('div');
-    date.className = 'week-date';
+    var date = document.createElement("div");
+    date.className = "week-date";
     date.textContent = d.getDate();
 
-    var dot = document.createElement('div');
-    dot.className = 'week-dot';
+    var dot = document.createElement("div");
+    dot.className = "week-dot";
 
     div.appendChild(label);
     div.appendChild(date);
@@ -196,15 +214,22 @@ function renderWeekBar(items) {
 
     if (hasNews) {
       (function(ds) {
-        div.addEventListener('click', function() {
-          scrollToDate(ds);
-        });
+        div.addEventListener("click", function() { scrollToDate(ds); });
       })(dateStr);
     }
 
     bar.appendChild(div);
   }
 }
+
+document.getElementById("weekPrev").addEventListener("click", function() {
+  weekOffset--;
+  renderWeekBar(allItems);
+});
+document.getElementById("weekNext").addEventListener("click", function() {
+  weekOffset++;
+  renderWeekBar(allItems);
+});
 
 function scrollToDate(dateStr) {
   var groups = document.querySelectorAll('.date-group');
