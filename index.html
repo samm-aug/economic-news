@@ -11,6 +11,11 @@ body { background: #0f0f0f; color: #e8e8e8; font-family: 'Apple SD Gothic Neo', 
 header { position: sticky; top: 0; z-index: 100; background: #0f0f0f; border-bottom: 1px solid #222; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
 header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
 header span { font-size: 13px; color: #666; }
+.search-bar { padding: 10px 16px; background: #0f0f0f; border-bottom: 1px solid #1a1a1a; }
+.search-input { width: 100%; max-width: 680px; margin: 0 auto; display: block; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 10px 16px 10px 40px; font-size: 15px; color: #e8e8e8; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 14px center; }
+.search-input::placeholder { color: #555; }
+.search-input:focus { border-color: #444; }
+.search-result-count { text-align: center; font-size: 13px; color: #555; padding: 8px 0 0; max-width: 680px; margin: 0 auto; }
 .feed { max-width: 680px; margin: 0 auto; padding: 16px; }
 .date-group { margin-bottom: 32px; }
 .date-label { font-size: 13px; color: #555; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 12px; padding-left: 4px; }
@@ -18,8 +23,10 @@ header span { font-size: 13px; color: #666; }
 .card:hover { border-color: #444; }
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 .card-title { font-size: 17px; font-weight: 600; line-height: 1.4; letter-spacing: -0.3px; flex: 1; }
+.card-title mark { background: #3d3200; color: #f0c040; border-radius: 3px; padding: 0 2px; }
 .stars { display: flex; gap: 2px; flex-shrink: 0; margin-top: 2px; font-size: 13px; }
 .card-summary { font-size: 14px; color: #999; line-height: 1.6; letter-spacing: -0.2px; margin-bottom: 12px; }
+.card-summary mark { background: #3d3200; color: #f0c040; border-radius: 3px; padding: 0 2px; }
 .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag { font-size: 12px; padding: 3px 8px; border-radius: 20px; font-weight: 500; background: #222; color: #888; }
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; overflow-y: auto; padding: 20px; }
@@ -35,7 +42,7 @@ header span { font-size: 13px; color: #666; }
 .modal-source a { color: #5b9bd5; text-decoration: none; }
 .loading { text-align: center; padding: 60px 20px; color: #444; font-size: 15px; }
 .error { text-align: center; padding: 60px 20px; color: #d55b5b; font-size: 15px; }
-.filter-bar { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px; scrollbar-width: none; }
+.filter-bar { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px; scrollbar-width: none; border-bottom: 1px solid #1a1a1a; }
 .filter-bar::-webkit-scrollbar { display: none; }
 .filter-btn { flex-shrink: 0; font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; background: transparent; color: #888; cursor: pointer; transition: all 0.15s; }
 .filter-btn:hover, .filter-btn.active { background: #e8e8e8; color: #0f0f0f; border-color: #e8e8e8; }
@@ -48,6 +55,7 @@ header span { font-size: 13px; color: #666; }
 .block-divider { border: none; border-top: 1px solid #2a2a2a; margin: 20px 0; }
 .modal-body a { color: #5b9bd5; text-decoration: none; }
 .modal-body code { background: #2a2a2a; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+.no-results { text-align: center; padding: 60px 20px; color: #555; font-size: 15px; }
 </style>
 </head>
 <body>
@@ -57,6 +65,10 @@ header span { font-size: 13px; color: #666; }
 </header>
 <div class="filter-bar" id="filterBar">
   <button class="filter-btn active" id="btn-전체">전체</button>
+</div>
+<div class="search-bar">
+  <input class="search-input" id="searchInput" type="text" placeholder="제목, 요약, 태그 검색...">
+  <div class="search-result-count" id="searchResultCount"></div>
 </div>
 <div class="feed" id="feed">
   <div class="loading">뉴스를 불러오는 중...</div>
@@ -77,6 +89,8 @@ var DB_ID = '2fa5d658-fe4a-8040-87ae-c4cb9106eca3';
 var PROXY = '/api/notion';
 var allItems = [];
 var newsMap = {};
+var currentTag = '전체';
+var searchQuery = '';
 
 function fetchDB() {
   return fetch(PROXY + '/databases/' + DB_ID + '/query', {
@@ -131,12 +145,40 @@ function groupByDate(items) {
   return groups;
 }
 
+function highlight(text, query) {
+  if (!query) return text;
+  var escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp('(' + escaped + ')', 'gi'), '<mark>$1</mark>');
+}
+
+function filterItems() {
+  var items = currentTag === '전체' ? allItems : allItems.filter(function(i) { return i.tags.indexOf(currentTag) !== -1; });
+  if (searchQuery) {
+    var q = searchQuery.toLowerCase();
+    items = items.filter(function(i) {
+      return i.title.toLowerCase().indexOf(q) !== -1 ||
+             i.summary.toLowerCase().indexOf(q) !== -1 ||
+             i.tags.join(' ').toLowerCase().indexOf(q) !== -1;
+    });
+  }
+  return items;
+}
+
 function renderFeed(items) {
   var feed = document.getElementById('feed');
+  var countEl = document.getElementById('searchResultCount');
+
+  if (searchQuery) {
+    countEl.textContent = items.length + '개 검색됨';
+  } else {
+    countEl.textContent = '';
+  }
+
   if (!items || items.length === 0) {
-    feed.innerHTML = '<div class="error">뉴스가 없습니다.</div>';
+    feed.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
     return;
   }
+
   newsMap = {};
   items.forEach(function(item) { newsMap[item.id] = item; });
 
@@ -147,9 +189,11 @@ function renderFeed(items) {
     html += '<div class="date-group">';
     html += '<div class="date-label">' + formatDate(date) + '</div>';
     groups[date].forEach(function(item) {
+      var titleHL = highlight(item.title, searchQuery);
+      var summaryHL = highlight(item.summary, searchQuery);
       html += '<div class="card" data-id="' + item.id + '">';
-      html += '<div class="card-top"><div class="card-title">' + item.title + '</div><div class="stars">' + starsHTML(item.stars) + '</div></div>';
-      if (item.summary) html += '<div class="card-summary">' + item.summary + '</div>';
+      html += '<div class="card-top"><div class="card-title">' + titleHL + '</div><div class="stars">' + starsHTML(item.stars) + '</div></div>';
+      if (item.summary) html += '<div class="card-summary">' + summaryHL + '</div>';
       if (item.tags.length) {
         html += '<div class="card-tags">';
         item.tags.forEach(function(t) { html += '<span class="tag">' + t + '</span>'; });
@@ -181,20 +225,30 @@ function renderFilters(items) {
     btn.className = 'filter-btn';
     btn.id = 'btn-' + tag;
     btn.textContent = tag;
-    btn.addEventListener('click', function() { filterByTag(tag); });
+    btn.addEventListener('click', function() { setTag(tag); });
     bar.appendChild(btn);
   });
 }
 
-function filterByTag(tag) {
+function setTag(tag) {
+  currentTag = tag;
   document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
   var activeBtn = document.getElementById('btn-' + tag);
   if (activeBtn) activeBtn.classList.add('active');
-  var filtered = tag === '전체' ? allItems : allItems.filter(function(i) { return i.tags.indexOf(tag) !== -1; });
-  renderFeed(filtered);
+  renderFeed(filterItems());
 }
 
-document.getElementById('btn-전체').addEventListener('click', function() { filterByTag('전체'); });
+document.getElementById('btn-전체').addEventListener('click', function() { setTag('전체'); });
+
+var searchTimeout;
+document.getElementById('searchInput').addEventListener('input', function() {
+  clearTimeout(searchTimeout);
+  var val = this.value;
+  searchTimeout = setTimeout(function() {
+    searchQuery = val.trim();
+    renderFeed(filterItems());
+  }, 200);
+});
 
 function blocksToHTML(blocks) {
   var html = '';
