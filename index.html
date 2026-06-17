@@ -199,11 +199,11 @@ document.getElementById('btn-전체').addEventListener('click', function() { fil
 function blocksToHTML(blocks) {
   var html = '';
   var numCount = 0;
-  blocks.forEach(function(block) {
+  for (var i = 0; i < blocks.length; i++) {
+    var block = blocks[i];
     var type = block.type;
     var content = block[type];
-   if (type === 'bulleted_list_item' || type === 'paragraph' || type === 'quote') numCount = 0;
-    if (!content) return;
+    if (!content) continue;
     var richText = content.rich_text || [];
     var inner = richText.map(function(t) {
       var text = t.plain_text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -217,19 +217,24 @@ function blocksToHTML(blocks) {
       return text;
     }).join('');
 
-    if (type === 'heading_1' || type === 'heading_2' || type === 'heading_3') {
+    if (type === 'numbered_list_item') {
+      var prevType = i > 0 ? blocks[i-1].type : '';
+      if (prevType !== 'numbered_list_item' && prevType !== 'bulleted_list_item' && prevType !== 'paragraph') {
+        numCount = 0;
+      }
+      numCount++;
+      html += '<div class="block-numbered">' + numCount + '. ' + inner + '</div>';
+    } else if (type === 'heading_1' || type === 'heading_2' || type === 'heading_3') {
+      numCount = 0;
       html += '<div class="block-heading">' + inner + '</div>';
     } else if (type === 'bulleted_list_item') {
       html += '<div class="block-bullet">• ' + inner + '</div>';
-    } else if (type === 'numbered_list_item') {
-      numCount++;
-      html += '<div class="block-numbered">' + numCount + '. ' + inner + '</div>';
     } else if (type === 'paragraph') {
       html += inner ? '<div class="block-para">' + inner + '</div>' : '<div class="block-gap"></div>';
     } else if (type === 'quote') {
       html += '<div class="block-quote">' + inner + '</div>';
     }
-  });
+  }
   return html;
 }
 
