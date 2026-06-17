@@ -202,7 +202,7 @@ function blocksToHTML(blocks) {
   blocks.forEach(function(block) {
     var type = block.type;
     var content = block[type];
-    if (type !== 'numbered_list_item') numCount = 0;
+   if (type === 'bulleted_list_item' || type === 'paragraph' || type === 'quote') numCount = 0;
     if (!content) return;
     var richText = content.rich_text || [];
     var inner = richText.map(function(t) {
