@@ -11,11 +11,28 @@ body { background: #0f0f0f; color: #e8e8e8; font-family: 'Apple SD Gothic Neo', 
 header { position: sticky; top: 0; z-index: 100; background: #0f0f0f; border-bottom: 1px solid #222; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
 header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
 header span { font-size: 13px; color: #666; }
+.week-bar { display: flex; justify-content: center; gap: 4px; padding: 12px 16px; background: #0f0f0f; border-bottom: 1px solid #1a1a1a; }
+.week-day { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 10px; cursor: pointer; transition: background 0.15s; min-width: 48px; }
+.week-day:hover { background: #1a1a1a; }
+.week-day.today { background: #1e2d1e; }
+.week-day.has-news .week-dot { opacity: 1; }
+.week-day-label { font-size: 11px; color: #555; font-weight: 500; }
+.week-day.today .week-day-label { color: #5bd58a; }
+.week-date { font-size: 16px; font-weight: 600; color: #888; }
+.week-day.today .week-date { color: #5bd58a; }
+.week-day.has-news .week-date { color: #e8e8e8; }
+.week-dot { width: 4px; height: 4px; border-radius: 50%; background: #5bd58a; opacity: 0; }
+.week-day.no-news { cursor: default; }
+.week-day.no-news:hover { background: transparent; }
+.filter-bar { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px; scrollbar-width: none; border-bottom: 1px solid #1a1a1a; }
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-btn { flex-shrink: 0; font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; background: transparent; color: #888; cursor: pointer; transition: all 0.15s; }
+.filter-btn:hover, .filter-btn.active { background: #e8e8e8; color: #0f0f0f; border-color: #e8e8e8; }
 .search-bar { padding: 10px 16px; background: #0f0f0f; border-bottom: 1px solid #1a1a1a; }
 .search-input { width: 100%; max-width: 680px; margin: 0 auto; display: block; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 10px 16px 10px 40px; font-size: 15px; color: #e8e8e8; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 14px center; }
 .search-input::placeholder { color: #555; }
 .search-input:focus { border-color: #444; }
-.search-result-count { text-align: center; font-size: 13px; color: #555; padding: 8px 0 0; max-width: 680px; margin: 0 auto; }
+.search-result-count { text-align: center; font-size: 13px; color: #555; padding: 6px 0 0; max-width: 680px; margin: 0 auto; }
 .feed { max-width: 680px; margin: 0 auto; padding: 16px; }
 .date-group { margin-bottom: 32px; }
 .date-label { font-size: 13px; color: #555; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 12px; padding-left: 4px; }
@@ -42,10 +59,7 @@ header span { font-size: 13px; color: #666; }
 .modal-source a { color: #5b9bd5; text-decoration: none; }
 .loading { text-align: center; padding: 60px 20px; color: #444; font-size: 15px; }
 .error { text-align: center; padding: 60px 20px; color: #d55b5b; font-size: 15px; }
-.filter-bar { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px; scrollbar-width: none; border-bottom: 1px solid #1a1a1a; }
-.filter-bar::-webkit-scrollbar { display: none; }
-.filter-btn { flex-shrink: 0; font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; background: transparent; color: #888; cursor: pointer; transition: all 0.15s; }
-.filter-btn:hover, .filter-btn.active { background: #e8e8e8; color: #0f0f0f; border-color: #e8e8e8; }
+.no-results { text-align: center; padding: 60px 20px; color: #555; font-size: 15px; }
 .block-heading { font-size: 19px; font-weight: 700; color: #ffffff; margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #2a2a2a; }
 .block-bullet { font-size: 15px; line-height: 1.8; color: #ccc; padding-left: 4px; margin-bottom: 6px; }
 .block-numbered { font-size: 15px; line-height: 1.8; color: #ccc; padding-left: 4px; margin-bottom: 6px; }
@@ -55,7 +69,6 @@ header span { font-size: 13px; color: #666; }
 .block-divider { border: none; border-top: 1px solid #2a2a2a; margin: 20px 0; }
 .modal-body a { color: #5b9bd5; text-decoration: none; }
 .modal-body code { background: #2a2a2a; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
-.no-results { text-align: center; padding: 60px 20px; color: #555; font-size: 15px; }
 </style>
 </head>
 <body>
@@ -63,6 +76,7 @@ header span { font-size: 13px; color: #666; }
   <h1>📈 경제뉴스</h1>
   <span id="count"></span>
 </header>
+<div class="week-bar" id="weekBar"></div>
 <div class="filter-bar" id="filterBar">
   <button class="filter-btn active" id="btn-전체">전체</button>
 </div>
@@ -128,6 +142,13 @@ function starsHTML(stars) {
   return result;
 }
 
+function toDateStr(d) {
+  var y = d.getFullYear();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var day = String(d.getDate()).padStart(2,'0');
+  return y + '-' + m + '-' + day;
+}
+
 function formatDate(dateStr) {
   if (!dateStr) return '';
   var d = new Date(dateStr);
@@ -135,14 +156,70 @@ function formatDate(dateStr) {
   return d.getFullYear() + '년 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일 (' + days[d.getDay()] + ')';
 }
 
-function groupByDate(items) {
-  var groups = {};
-  items.forEach(function(item) {
-    var d = item.date || '날짜 없음';
-    if (!groups[d]) groups[d] = [];
-    groups[d].push(item);
-  });
-  return groups;
+function renderWeekBar(items) {
+  var newsDates = {};
+  items.forEach(function(item) { if (item.date) newsDates[item.date] = true; });
+
+  var today = new Date();
+  var dayOfWeek = today.getDay();
+  var monday = new Date(today);
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+
+  var dayNames = ['월','화','수','목','금'];
+  var bar = document.getElementById('weekBar');
+  bar.innerHTML = '';
+
+  for (var i = 0; i < 5; i++) {
+    var d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    var dateStr = toDateStr(d);
+    var isToday = toDateStr(today) === dateStr;
+    var hasNews = !!newsDates[dateStr];
+
+    var div = document.createElement('div');
+    div.className = 'week-day' + (isToday ? ' today' : '') + (hasNews ? ' has-news' : ' no-news');
+
+    var label = document.createElement('div');
+    label.className = 'week-day-label';
+    label.textContent = dayNames[i];
+
+    var date = document.createElement('div');
+    date.className = 'week-date';
+    date.textContent = d.getDate();
+
+    var dot = document.createElement('div');
+    dot.className = 'week-dot';
+
+    div.appendChild(label);
+    div.appendChild(date);
+    div.appendChild(dot);
+
+    if (hasNews) {
+      (function(ds) {
+        div.addEventListener('click', function() {
+          scrollToDate(ds);
+        });
+      })(dateStr);
+    }
+
+    bar.appendChild(div);
+  }
+}
+
+function scrollToDate(dateStr) {
+  var groups = document.querySelectorAll('.date-group');
+  for (var i = 0; i < groups.length; i++) {
+    var label = groups[i].querySelector('.date-label');
+    if (label) {
+      var d = new Date(dateStr);
+      var days = ['일','월','화','수','목','금','토'];
+      var formatted = d.getFullYear() + '년 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일 (' + days[d.getDay()] + ')';
+      if (label.textContent === formatted) {
+        groups[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+    }
+  }
 }
 
 function highlight(text, query) {
@@ -164,21 +241,28 @@ function filterItems() {
   return items;
 }
 
+function groupByDate(items) {
+  var groups = {};
+  items.forEach(function(item) {
+    var d = item.date || '날짜 없음';
+    if (!groups[d]) groups[d] = [];
+    groups[d].push(item);
+  });
+  return groups;
+}
+
 function renderFeed(items) {
   var feed = document.getElementById('feed');
   var countEl = document.getElementById('searchResultCount');
-
   if (searchQuery) {
     countEl.textContent = items.length + '개 검색됨';
   } else {
     countEl.textContent = '';
   }
-
   if (!items || items.length === 0) {
     feed.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
     return;
   }
-
   newsMap = {};
   items.forEach(function(item) { newsMap[item.id] = item; });
 
@@ -186,7 +270,7 @@ function renderFeed(items) {
   var dates = Object.keys(groups).sort(function(a,b) { return b < a ? -1 : 1; });
   var html = '';
   dates.forEach(function(date) {
-    html += '<div class="date-group">';
+    html += '<div class="date-group" data-date="' + date + '">';
     html += '<div class="date-label">' + formatDate(date) + '</div>';
     groups[date].forEach(function(item) {
       var titleHL = highlight(item.title, searchQuery);
@@ -270,7 +354,6 @@ function blocksToHTML(blocks) {
       if (t.href) text = '<a href="' + t.href + '" target="_blank">' + text + '</a>';
       return text;
     }).join('');
-
     if (type === 'heading_1' || type === 'heading_2' || type === 'heading_3') {
       numCount = 0;
       html += '<div class="block-heading">' + inner + '</div>';
@@ -301,7 +384,6 @@ function openModal(pageId, item) {
   document.getElementById('modalSummary').textContent = item.summary;
   document.getElementById('modalBody').innerHTML = '<div class="loading">본문을 불러오는 중...</div>';
   document.getElementById('modalSource').innerHTML = item.url ? '출처: <a href="' + item.url + '" target="_blank">' + (item.source || item.url) + '</a>' : '';
-
   fetchPage(pageId).then(function(data) {
     var blocks = data.results || [];
     var bodyHTML = blocksToHTML(blocks);
@@ -326,6 +408,7 @@ fetchDB().then(function(data) {
   }
   allItems = data.results.map(parseItem);
   document.getElementById('count').textContent = allItems.length + '개';
+  renderWeekBar(allItems);
   renderFilters(allItems);
   renderFeed(allItems);
 });
