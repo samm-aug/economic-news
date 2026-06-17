@@ -198,9 +198,11 @@ document.getElementById('btn-전체').addEventListener('click', function() { fil
 
 function blocksToHTML(blocks) {
   var html = '';
+  var numCount = 0;
   blocks.forEach(function(block) {
     var type = block.type;
     var content = block[type];
+    if (type !== 'numbered_list_item') numCount = 0;
     if (!content) return;
     var richText = content.rich_text || [];
     var inner = richText.map(function(t) {
@@ -220,7 +222,8 @@ function blocksToHTML(blocks) {
     } else if (type === 'bulleted_list_item') {
       html += '<div class="block-bullet">• ' + inner + '</div>';
     } else if (type === 'numbered_list_item') {
-      html += '<div class="block-numbered">' + inner + '</div>';
+      numCount++;
+      html += '<div class="block-numbered">' + numCount + '. ' + inner + '</div>';
     } else if (type === 'paragraph') {
       html += inner ? '<div class="block-para">' + inner + '</div>' : '<div class="block-gap"></div>';
     } else if (type === 'quote') {
